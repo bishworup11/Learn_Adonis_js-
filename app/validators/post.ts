@@ -16,7 +16,6 @@ export const updatePostValidator = vine.compile(
   vine.object({
     id: vine.number().positive(),
     title: vine.string().trim().minLength(6),
-    description: vine.string().trim().escape(),
   })
 )
 

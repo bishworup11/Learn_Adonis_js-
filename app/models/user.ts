@@ -1,30 +1,53 @@
-import { DateTime } from 'luxon'
-import hash from '@adonisjs/core/services/hash'
-import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
-import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
+// app/Models/User.ts
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+import Post from './post.js'
+import Comment from './Comment.js'
+import Reply from './Reply.js'
+import PostLike from './PostLike.js'
+import CommentLike from './CommentLike.js'
+import ReplyLike from './ReplyLike.js'
 
-const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
-  uids: ['email'],
-  passwordColumnName: 'password',
-})
-
-export default class User extends compose(BaseModel, AuthFinder) {
+export default class User extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare userId: number
 
   @column()
-  declare fullName: string | null
+  declare firstName: string
+
+  @column()
+  declare lastName: string
 
   @column()
   declare email: string
 
-  @column({ serializeAs: null })
-  declare password: string
+  @hasMany(() => Post, {
+    foreignKey: 'userId',
+  })
+  declare posts: HasMany<typeof Post>
 
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  @hasMany(() => Comment, {
+    foreignKey: 'userId',
+  })
+  declare comments: HasMany<typeof Comment>
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  @hasMany(() => Reply, {
+    foreignKey: 'userId',
+  })
+  declare replies: HasMany<typeof Reply>
+
+  @hasMany(() => PostLike, {
+    foreignKey: 'userId',
+  })
+  declare postLikes: HasMany<typeof PostLike>
+
+  @hasMany(() => CommentLike, {
+    foreignKey: 'userId',
+  })
+  declare commentLikes: HasMany<typeof CommentLike>
+
+  @hasMany(() => ReplyLike, {
+    foreignKey: 'userId',
+  })
+  declare replyLikes: HasMany<typeof ReplyLike>
 }
