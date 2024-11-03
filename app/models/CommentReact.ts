@@ -1,10 +1,16 @@
-// app/Models/CommentLike.ts
+// app/Models/CommentReact.ts
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 import Comment from './Comment.js'
 
-export default class CommentLike extends BaseModel {
+export enum ReactType {
+  LIKE = 'like',
+  LOVE = 'love',
+  ANGRY = 'angry',
+}
+
+export default class CommentReact extends BaseModel {
   @column({ isPrimary: true })
   declare commentsLikeId: number
 
@@ -13,6 +19,9 @@ export default class CommentLike extends BaseModel {
 
   @column()
   declare userId: number
+
+  @column()
+  declare reactType: ReactType
 
   @belongsTo(() => User, {
     foreignKey: 'userId',

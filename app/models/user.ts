@@ -4,8 +4,8 @@ import type { HasMany } from '@adonisjs/lucid/types/relations'
 import Post from './post.js'
 import Comment from './Comment.js'
 import Reply from './Reply.js'
-import PostLike from './PostLike.js'
-import CommentLike from './CommentLike.js'
+import PostReact from './PostReact.js'
+import CommentReact from './CommentReact.js'
 import ReplyLike from './ReplyLike.js'
 
 export default class User extends BaseModel {
@@ -36,15 +36,15 @@ export default class User extends BaseModel {
   })
   declare replies: HasMany<typeof Reply>
 
-  @hasMany(() => PostLike, {
+  @hasMany(() => PostReact, {
     foreignKey: 'userId',
   })
-  declare postLikes: HasMany<typeof PostLike>
+  declare postLikes: HasMany<typeof PostReact>
 
-  @hasMany(() => CommentLike, {
+  @hasMany(() => CommentReact, {
     foreignKey: 'userId',
   })
-  declare commentLikes: HasMany<typeof CommentLike>
+  declare commentLikes: HasMany<typeof CommentReact>
 
   @hasMany(() => ReplyLike, {
     foreignKey: 'userId',

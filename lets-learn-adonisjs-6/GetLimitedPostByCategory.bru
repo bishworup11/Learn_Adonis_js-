@@ -1,0 +1,17 @@
+meta {
+  name: GetLimitedPostByCategory
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:3333/get-limited-post-catergory?page=1&limit=5&category=Travel
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  limit: 5
+  category: Travel
+}

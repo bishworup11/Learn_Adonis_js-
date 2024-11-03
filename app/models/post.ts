@@ -4,7 +4,7 @@ import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { HasMany, BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 import Comment from './Comment.js'
-import PostLike from './PostLike.js'
+import PostReact from './PostReact.js'
 import PostCategory from './PostCategory.js'
 
 export default class Post extends BaseModel {
@@ -41,8 +41,8 @@ export default class Post extends BaseModel {
   })
   declare comments: HasMany<typeof Comment>
 
-  @hasMany(() => PostLike, {
+  @hasMany(() => PostReact, {
     foreignKey: 'postId',
   })
-  declare likes: HasMany<typeof PostLike>
+  declare likes: HasMany<typeof PostReact>
 }

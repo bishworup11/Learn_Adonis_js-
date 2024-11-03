@@ -1,18 +1,29 @@
-// app/Models/PostLike.ts
+// app/Models/PostReact.ts
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 import Post from './post.js'
 
-export default class PostLike extends BaseModel {
+// Enum for reaction types
+export enum ReactType {
+  LIKE = 'like',
+  LOVE = 'love',
+  ANGRY = 'angry',
+}
+
+export default class PostReact extends BaseModel {
   @column({ isPrimary: true })
-  declare postLikeId: number
+  declare postReactId: number
 
   @column()
   declare postId: number
 
   @column()
   declare userId: number
+
+  // Use the enum type here
+  @column()
+  declare reactType: ReactType
 
   @belongsTo(() => User, {
     foreignKey: 'userId',

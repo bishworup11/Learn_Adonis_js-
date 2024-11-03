@@ -1,0 +1,23 @@
+meta {
+  name: createPost
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:3333/create-post
+  body: none
+  auth: none
+}
+
+headers {
+  X-CSRF-TOKEN: J4FgdqRM-VY6l2LcNQGkFgXIdIxp_pvSJGRE
+}
+
+docs {
+  {
+    "userId":1,
+    "title":"New post created",
+    "category":"Technology"
+  }
+}

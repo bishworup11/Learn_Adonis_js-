@@ -653,3 +653,5 @@ get all posts with category
 ```
 
 </details>
+
+## Day 3

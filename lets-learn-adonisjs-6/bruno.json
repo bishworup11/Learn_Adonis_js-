@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "lets-learn-adonisjs-6",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

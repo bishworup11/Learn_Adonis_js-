@@ -19,7 +19,7 @@ router.get('login', [PostsController, 'login'])
 
 // // Get all posts
 router.get('get-posts', [PostsController, 'getPosts'])
-router.get('get-limited-posts', [PostsController, 'getLimitedPosts'])
+router.get('get-limited-post-catergory', [PostsController, 'getLimitedPostsByCategory'])
 // // Create post
 
 router.post('create-post', [PostsController, 'createPost'])
