@@ -1,0 +1,19 @@
+meta {
+  name: Delete comment
+  type: http
+  seq: 7
+}
+
+delete {
+  url: http://localhost:3333/delete-comment
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userId": 2,
+    "CommentId":1
+  }
+  
+}

@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "lets-learn-adonisjs-6",
+  "name": "API test with bruno",
   "type": "collection",
   "ignore": [
     "node_modules",

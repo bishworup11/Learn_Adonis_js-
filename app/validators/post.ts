@@ -1,6 +1,7 @@
 import vine from '@vinejs/vine'
 
 import { ReactType } from '../models/PostReact.js'
+import Comment from '#models/Comment'
 
 /**
  * Validates the post's creation action
@@ -51,5 +52,28 @@ export const PostReactValidator = vine.compile(
     postId: vine.number().positive(),
     userId: vine.number().positive(),
     reactType: vine.enum(Object.values(ReactType)),
+  })
+)
+
+export const createCommentValidator = vine.compile(
+  vine.object({
+    userId: vine.number().positive(),
+    postId: vine.number().positive(),
+    text: vine.string().trim().minLength(1),
+  })
+)
+
+export const deleteCommentValidator = vine.compile(
+  vine.object({
+    userId: vine.number().positive(),
+    CommentId: vine.number().positive(),
+  })
+)
+
+export const UpdateCommentValidator = vine.compile(
+  vine.object({
+    userId: vine.number().positive(),
+    commentId: vine.number().positive(),
+    text: vine.string().trim().minLength(1),
   })
 )

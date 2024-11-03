@@ -34,3 +34,15 @@ router.delete('delete-post', [PostsController, 'deletePost'])
 
 // Post Reactions
 router.post('post-react', [PostsController, 'postReaction'])
+
+// Post Comment create
+
+router.post('create-comment', [PostsController, 'createComment'])
+
+// // Update comment
+
+router.post('update-comment', [PostsController, 'updateComment'])
+
+// // Delete comment
+
+router.delete('delete-comment', [PostsController, 'deletecomment'])
