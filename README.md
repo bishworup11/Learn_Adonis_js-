@@ -579,3 +579,77 @@ public async getPosts({ response, request }: HttpContext) {
 ```
 
 </details>
+
+<details>
+<summary> Add Category table and relation one to many with posts table </summary>
+
+- app/models/post.ts
+
+add this in post,ts
+
+```ts
+
+  @belongsTo(() => PostCategory, {
+    foreignKey: 'postCategoryId',
+  })
+  declare postCategory: BelongsTo<typeof PostCategory>
+
+
+```
+
+- app/models/PostCategory.ts
+
+```ts
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+import Post from './post.js'
+
+export default class PostCategory extends BaseModel {
+  @column({ isPrimary: true })
+  declare postCategoryId: number
+
+  @column()
+  declare type: string
+
+  @hasMany(() => Post, {
+    foreignKey: 'postCategoryId',
+  })
+  declare posts: HasMany<typeof Post>
+}
+```
+
+get all posts with category
+
+- app/Controllers/Http/PostsController.ts
+
+```ts
+
+ public async getLimitedPosts({ response, request }: HttpContext) {
+    try {
+      // const posts = await Post.all()
+      const limit = request.input('limit', 5)
+      const page = request.input('page', 1)
+      const type = 'Technology'
+
+      const posts = await db
+        .from('posts')
+        .select(
+          'posts.*', // All columns from posts table
+          'post_categories.type as category_type' // Only 'type' column from post_categories
+        )
+        .join('post_categories', 'posts.post_category_id', 'post_categories.post_category_id')
+        .where('post_categories.type', type)
+        .paginate(page, Number(limit))
+
+      response.status(200).send(posts)
+    } catch (error) {
+      response.status(500).send({
+        message: 'Failed to fetch posts',
+        error: error.message,
+      })
+    }
+  }
+
+```
+
+</details>
