@@ -31,3 +31,6 @@ router.post('update-post', [PostsController, 'updatePost'])
 // // Delete post
 
 router.delete('delete-post', [PostsController, 'deletePost'])
+
+// Post Reactions
+router.post('post-react', [PostsController, 'postReaction'])

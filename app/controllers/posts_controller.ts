@@ -3,9 +3,13 @@ import {
   createPostValidator,
   updatePostValidator,
   deletePostValidator,
+  getAllPostsValidator,
+  PostReactValidator,
 } from '../validators/post.js'
 import Post from '#models/post'
 import db from '@adonisjs/lucid/services/db'
+import PostReact from '#models/PostReact'
+import ReactType from '../models/PostReact.js'
 
 export default class PostsController {
   public async login(ctx: HttpContext) {
@@ -16,8 +20,9 @@ export default class PostsController {
   public async getPosts({ response, request }: HttpContext) {
     try {
       // const posts = await Post.all()
-      const page = request.input('page', 1)
-      const limit = request.input('limit', 10)
+      const validatedData = await getAllPostsValidator.validate(request.all())
+      const limit = validatedData.limit ? validatedData.limit : 5
+      const page = validatedData.page ? validatedData.page : 1
 
       const posts = await db.from('posts').paginate(page, limit)
       console.log(posts)
@@ -33,10 +38,10 @@ export default class PostsController {
 
   public async getLimitedPostsByCategory({ response, request }: HttpContext) {
     try {
-      // const posts = await Post.all()
-      const limit = request.input('limit', 5)
-      const page = request.input('page', 1)
-      const type = request.input('category', 'Travel')
+      const validatedData = await getAllPostsValidator.validate(request.all())
+      const limit = validatedData.limit ? validatedData.limit : 5
+      const page = validatedData.page ? validatedData.page : 1
+      const type = validatedData.category ? validatedData.category : 'Travel'
 
       // const posts = await db
       //   .from('posts')
@@ -47,6 +52,7 @@ export default class PostsController {
       //   .join('post_categories', 'posts.post_category_id', 'post_categories.post_category_id')
       //   .where('post_categories.type', type)
       //   .paginate(page, Number(limit))
+
       const posts = await Post.query()
         .preload('user')
         .preload('postCategory')
@@ -152,5 +158,43 @@ export default class PostsController {
       message: 'Delete post successfully',
       deletedPost: post,
     })
+  }
+
+  public async postReaction({ request, response }: HttpContext) {
+    const validatedData = await PostReactValidator.validate(request.all())
+    const postId: number = validatedData.postId
+    const userId: number = validatedData.userId
+
+    const post = await Post.findOrFail(postId)
+
+    if (!post) {
+      return response.status(404).send({
+        message: 'Post not found',
+      })
+    }
+
+    const postReact = await PostReact.query()
+      .where('postId', postId)
+      .andWhere('userId', userId)
+      .first()
+
+    if (!postReact) {
+      const postReactCreated = await PostReact.create({
+        userId: validatedData.userId,
+        postId: validatedData.postId,
+        reactType: validatedData.reactType,
+      })
+
+      response.status(200).send({
+        message: ' React  successfully',
+        postReactCreated,
+      })
+    } else {
+      await postReact.delete()
+
+      response.status(200).send({
+        message: 'undo react  successfully',
+      })
+    }
   }
 }
