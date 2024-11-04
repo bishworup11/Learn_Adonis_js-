@@ -16,42 +16,26 @@ router.on('/').render('pages/home').as('home')
 // Persistent posts array for testing (normally, you'd use a database)
 
 router.get('login', [PostsController, 'login'])
+//Select users who made the most posts, sorted by post count:
+router.get('users-by-post-count', [PostsController, 'getUsersByPostCount'])
 
-// // Get all posts
+// Post CRUD and all routes
 router.get('get-post', [PostsController, 'getPosts'])
 router.get('get-limited-post-catergory', [PostsController, 'getLimitedPostsByCategory'])
-// // Create post
 router.post('create-post', [PostsController, 'createPost'])
-
-// // Update post
-
 router.post('update-post', [PostsController, 'updatePost'])
-
-// // Delete post
-
 router.delete('delete-post', [PostsController, 'deletePost'])
 
 // Post Reactions
 router.post('post-react', [PostsController, 'postReaction'])
 
-// Comment create
+// Comment CRUD and Comment Reactions
 
 router.post('create-comment', [PostsController, 'createComment'])
-
-// comment get
-
 router.get('get-comment', [PostsController, 'getComment'])
-
-// // Update comment
-
 router.post('update-comment', [PostsController, 'updateComment'])
-
-// comment Reactions
-router.post('comment-react', [PostsController, 'commentReaction'])
-
-// // Delete comment
-
 router.delete('delete-comment', [PostsController, 'deletecomment'])
+router.post('comment-react', [PostsController, 'commentReaction'])
 
 // Routes for Reply and Reply Reactions
 router.post('create-reply', [PostsController, 'createReply'])

@@ -8,6 +8,8 @@ import Reply from './Reply.js'
 import CommentReact from './CommentReact.js'
 
 export default class Comment extends BaseModel {
+  public serializeExtras = true
+
   @column({ isPrimary: true })
   declare commentId: number
 
@@ -44,5 +46,5 @@ export default class Comment extends BaseModel {
   @hasMany(() => CommentReact, {
     foreignKey: 'commentId',
   })
-  declare likes: HasMany<typeof CommentReact>
+  declare reacts: HasMany<typeof CommentReact>
 }

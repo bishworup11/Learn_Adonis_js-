@@ -13,6 +13,7 @@ import {
   deleteReplyValidator,
   UpdateReplyValidator,
   ReplyReactValidator,
+  getUsersByPostCountValidator,
 } from '../validators/post.js'
 import Post from '#models/post'
 import db from '@adonisjs/lucid/services/db'
@@ -21,11 +22,58 @@ import Comment from '#models/Comment'
 import CommentReact from '#models/CommentReact'
 import Reply from '#models/Reply'
 import ReplyReact from '#models/ReplyReact'
+import User from '#models/user'
 
 export default class PostsController {
   public async login(ctx: HttpContext) {
     const csrfToken = ctx.request.csrfToken
     ctx.response.status(200).send(csrfToken)
+  }
+
+  public async getUsersByPostCount({ request, response }: HttpContext) {
+    try {
+      const validatedData = await getUsersByPostCountValidator.validate(request.all())
+
+      const { limit = 10, page = 1, minPosts = 0 } = validatedData
+
+      const query = User.query()
+        .select('users.*')
+        .withCount('posts')
+        // .preload('posts', (postsQuery) => {
+        //   postsQuery.orderBy('created_at', 'desc')
+        // })
+        .havingRaw('COUNT(posts.post_id) >= ?', [minPosts])
+        .orderBy(db.raw('COUNT(posts.post_id)'), 'desc')
+        .join('posts', 'users.user_id', '=', 'posts.user_id')
+        .groupBy('users.user_id')
+
+      const users = await query.paginate(page, limit)
+
+      // const formattedUsers = users.map((user) => ({
+      //   userId: user.userId,
+      //   firstName: user.firstName,
+      //   lastName: user.lastName,
+      //   email: user.email,
+      //   postCount: Number(user.$extras.posts_count),
+      //   recentPosts: user.posts.slice(0, 3), // Include 3 most recent posts
+      // }))
+
+      return response.status(200).send({
+        message: 'Users retrieved successfully',
+        users: users,
+        pagination: {
+          total: users.length,
+          perPage: limit,
+          currentPage: page,
+          lastPage: Math.ceil(users.length / limit),
+        },
+      })
+    } catch (error) {
+      return response.status(400).send({
+        message: 'Failed to retrieve users',
+        errors: error.messages || error.message,
+      })
+    }
   }
 
   public async getPosts({ response, request }: HttpContext) {
@@ -256,15 +304,14 @@ export default class PostsController {
     try {
       const comments = await Comment.query()
         .preload('user')
-        .preload('post')
+        // .preload('post')
+        .withCount('reacts')
         .where('postId', postId)
         .orderBy('createdAt', 'desc')
         .paginate(prevPage, 2)
 
       response.status(200).send({
         comments,
-        postId,
-        prevPage,
       })
     } catch (error) {
       return response.status(400).send({

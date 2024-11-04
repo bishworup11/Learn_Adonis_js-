@@ -118,3 +118,12 @@ export const ReplyReactValidator = vine.compile(
     reactType: vine.enum(Object.values(ReactType)),
   })
 )
+
+// Add this to your validators/post.js
+export const getUsersByPostCountValidator = vine.compile(
+  vine.object({
+    limit: vine.number().positive().optional(),
+    page: vine.number().positive().optional(),
+    minPosts: vine.number().positive().optional(),
+  })
+)

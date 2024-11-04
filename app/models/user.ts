@@ -9,6 +9,8 @@ import CommentReact from './CommentReact.js'
 import ReplyReact from './ReplyReact.js'
 
 export default class User extends BaseModel {
+  public serializeExtras = true
+
   @column({ isPrimary: true })
   declare userId: number
 
