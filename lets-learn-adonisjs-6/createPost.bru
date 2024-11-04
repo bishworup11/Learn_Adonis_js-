@@ -6,12 +6,20 @@ meta {
 
 post {
   url: http://localhost:3333/create-post
-  body: none
+  body: json
   auth: none
 }
 
 headers {
   X-CSRF-TOKEN: J4FgdqRM-VY6l2LcNQGkFgXIdIxp_pvSJGRE
+}
+
+body:json {
+  {
+    "userId":3,
+    "title":"New post created",
+    "category":"Travel"
+  }
 }
 
 docs {

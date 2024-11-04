@@ -11,8 +11,10 @@ export enum ReactType {
 }
 
 export default class CommentReact extends BaseModel {
+  public serializeExtras = true
+
   @column({ isPrimary: true })
-  declare commentsLikeId: number
+  declare commentReactId: number
 
   @column()
   declare commentId: number

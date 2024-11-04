@@ -8,12 +8,13 @@ import {
   createCommentValidator,
   deleteCommentValidator,
   UpdateCommentValidator,
+  CommentReactValidator,
 } from '../validators/post.js'
 import Post from '#models/post'
 import db from '@adonisjs/lucid/services/db'
 import PostReact from '#models/PostReact'
-import ReactType from '../models/PostReact.js'
 import Comment from '#models/Comment'
+import CommentReact from '#models/CommentReact'
 
 export default class PostsController {
   public async login(ctx: HttpContext) {
@@ -23,15 +24,39 @@ export default class PostsController {
 
   public async getPosts({ response, request }: HttpContext) {
     try {
-      // const posts = await Post.all()
       const validatedData = await getAllPostsValidator.validate(request.all())
       const limit = validatedData.limit ? validatedData.limit : 5
       const page = validatedData.page ? validatedData.page : 1
+      const postId = validatedData.postId ? validatedData.postId : null
 
-      const posts = await db.from('posts').paginate(page, limit)
-      console.log(posts)
+      //const posts = await db.from('posts').paginate(page, limit)
+      if (postId) {
+        const posts = await Post.query()
+          .preload('user')
+          .preload('postCategory', (q) => q.select('type'))
+          .withCount('comments', (q) => q.as('comment_count'))
+          .withCount('postReacts', (q) => q.as('reaction_count'))
+          .join('post_categories', 'posts.post_category_id', 'post_categories.post_category_id')
+          .where('posts.post_id', postId)
+          .orderBy('postId', 'desc')
 
-      response.status(200).send(posts)
+        // console.log(posts)
+
+        response.status(200).send(posts)
+      } else {
+        const posts = await Post.query()
+          .preload('user')
+          .preload('postCategory', (q) => q.select('type'))
+          .withCount('comments', (q) => q.as('comment_count'))
+          .withCount('postReacts', (q) => q.as('reaction_count'))
+          .join('post_categories', 'posts.post_category_id', 'post_categories.post_category_id')
+          .orderBy('postId', 'desc')
+          .paginate(page, Number(limit))
+
+        //  console.log(posts)
+
+        response.status(200).send(posts)
+      }
     } catch (error) {
       response.status(500).send({
         message: 'Failed to fetch posts',
@@ -225,6 +250,29 @@ export default class PostsController {
     }
   }
 
+  public async getComment({ request, response }: HttpContext) {
+    const postId = request.input('postId')
+    const prevPage = request.input('prevPage', 1)
+    try {
+      const comments = await Comment.query()
+        .preload('user')
+        .preload('post')
+        .where('postId', postId)
+        .orderBy('createdAt', 'desc')
+        .paginate(prevPage, 2)
+
+      response.status(200).send({
+        comments,
+        postId,
+        prevPage,
+      })
+    } catch (error) {
+      return response.status(400).send({
+        errors: error.messages,
+      })
+    }
+  }
+
   public async deletecomment({ request, response }: HttpContext) {
     const validatedData = await deleteCommentValidator.validate(request.all())
     const userId: number = validatedData.userId
@@ -281,6 +329,53 @@ export default class PostsController {
     response.status(200).send({
       message: 'Update post successfully',
       comment,
+    })
+  }
+
+  public async commentReaction({ request, response }: HttpContext) {
+    const validatedData = await CommentReactValidator.validate(request.all())
+    const commentId: number = validatedData.commentId
+    const userId: number = validatedData.userId
+
+    const comment = await Comment.findOrFail(commentId)
+
+    if (!comment) {
+      return response.status(404).send({
+        message: 'Comment not found',
+      })
+    }
+
+    const commentReact = await CommentReact.query()
+      .where('commentId', commentId)
+      .andWhere('userId', userId)
+      .first()
+
+    console.log(commentReact)
+
+    if (commentReact) {
+      await commentReact.delete()
+
+      //  const commentReact = await CommentReact.query()
+      //    .delete()
+      //    .where('commentId', commentId)
+      //    .andWhere('userId', userId)
+      //    .first()
+
+      return response.status(200).send({
+        message: 'Undo react successfully',
+        commentReact,
+      })
+    }
+
+    const commentReactCreated = await CommentReact.create({
+      userId: validatedData.userId,
+      commentId: validatedData.commentId,
+      reactType: validatedData.reactType,
+    })
+
+    return response.status(200).send({
+      message: 'Reacted successfully',
+      commentReactCreated,
     })
   }
 }

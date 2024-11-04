@@ -6,6 +6,14 @@ meta {
 
 post {
   url: http://localhost:3333/update-post
-  body: none
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "userId":3,
+    "postId":98,
+    "title":"Post updated 1"
+  }
 }

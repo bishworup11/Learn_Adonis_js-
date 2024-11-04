@@ -6,7 +6,7 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('comment_react_id').primary()
+      table.increments('comment_react_id')
       table
         .integer('comment_id')
         .unsigned()
@@ -24,10 +24,7 @@ export default class extends BaseSchema {
         .onDelete('CASCADE') // Deletes reaction if associated user is deleted
 
       // Enum for react type
-       table.enum('react_type', Object.values(ReactType)).notNullable().defaultTo(ReactType.LIKE)
-
-      table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(this.now())
-      table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(this.now())
+      table.enum('react_type', Object.values(ReactType)).notNullable().defaultTo(ReactType.LIKE)
     })
   }
 

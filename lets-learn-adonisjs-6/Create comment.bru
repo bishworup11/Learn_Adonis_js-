@@ -6,6 +6,15 @@ meta {
 
 post {
   url: http://localhost:3333/create-comment
-  body: none
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "userId": 1,
+    "postId": 3,
+    "text": "user 1 post on postId 3 II"
+  }
+  
 }

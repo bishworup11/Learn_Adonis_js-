@@ -8,6 +8,8 @@ import PostReact from './PostReact.js'
 import PostCategory from './PostCategory.js'
 
 export default class Post extends BaseModel {
+  public serializeExtras = true
+
   @column({ isPrimary: true })
   declare postId: number
 
@@ -44,5 +46,5 @@ export default class Post extends BaseModel {
   @hasMany(() => PostReact, {
     foreignKey: 'postId',
   })
-  declare likes: HasMany<typeof PostReact>
+  declare postReacts: HasMany<typeof PostReact>
 }

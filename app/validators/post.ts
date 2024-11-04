@@ -41,6 +41,7 @@ export const getPostValidator = vine.compile(
 
 export const getAllPostsValidator = vine.compile(
   vine.object({
+    postId: vine.number().positive().optional(),
     limit: vine.number().positive().optional(),
     page: vine.number().positive().optional(),
     category: vine.string().trim().minLength(3).optional(),
@@ -75,5 +76,13 @@ export const UpdateCommentValidator = vine.compile(
     userId: vine.number().positive(),
     commentId: vine.number().positive(),
     text: vine.string().trim().minLength(1),
+  })
+)
+
+export const CommentReactValidator = vine.compile(
+  vine.object({
+    commentId: vine.number().positive(),
+    userId: vine.number().positive(),
+    reactType: vine.enum(Object.values(ReactType)),
   })
 )

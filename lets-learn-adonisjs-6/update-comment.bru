@@ -6,6 +6,14 @@ meta {
 
 post {
   url: http://localhost:3333/update-comment
-  body: none
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "userId":1,
+    "commentId":3,
+    "text":"update comment"
+  }
 }

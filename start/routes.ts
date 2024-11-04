@@ -18,10 +18,9 @@ router.on('/').render('pages/home').as('home')
 router.get('login', [PostsController, 'login'])
 
 // // Get all posts
-router.get('get-posts', [PostsController, 'getPosts'])
+router.get('get-post', [PostsController, 'getPosts'])
 router.get('get-limited-post-catergory', [PostsController, 'getLimitedPostsByCategory'])
 // // Create post
-
 router.post('create-post', [PostsController, 'createPost'])
 
 // // Update post
@@ -35,13 +34,20 @@ router.delete('delete-post', [PostsController, 'deletePost'])
 // Post Reactions
 router.post('post-react', [PostsController, 'postReaction'])
 
-// Post Comment create
+// Comment create
 
 router.post('create-comment', [PostsController, 'createComment'])
+
+// comment get
+
+router.get('get-comment', [PostsController, 'getComment'])
 
 // // Update comment
 
 router.post('update-comment', [PostsController, 'updateComment'])
+
+// comment Reactions
+router.post('comment-react', [PostsController, 'commentReaction'])
 
 // // Delete comment
 

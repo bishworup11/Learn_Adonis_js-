@@ -1,0 +1,15 @@
+meta {
+  name: Get comment
+  type: http
+  seq: 11
+}
+
+get {
+  url: http://localhost:3333/get-comment?postId=2
+  body: none
+  auth: none
+}
+
+params:query {
+  postId: 2
+}
