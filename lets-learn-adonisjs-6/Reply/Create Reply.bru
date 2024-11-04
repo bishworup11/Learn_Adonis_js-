@@ -1,0 +1,19 @@
+meta {
+  name: Create Reply
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3333/create-reply
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userId": 1,
+    "commentId": 3,
+    "text": "user 1 reply on commentId 3 I"
+  }
+}

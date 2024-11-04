@@ -86,3 +86,35 @@ export const CommentReactValidator = vine.compile(
     reactType: vine.enum(Object.values(ReactType)),
   })
 )
+
+// Validators for Reply and Reply Reactions
+export const createReplyValidator = vine.compile(
+  vine.object({
+    userId: vine.number().positive(),
+    commentId: vine.number().positive(),
+    text: vine.string().trim().minLength(1),
+  })
+)
+
+export const deleteReplyValidator = vine.compile(
+  vine.object({
+    userId: vine.number().positive(),
+    replyId: vine.number().positive(),
+  })
+)
+
+export const UpdateReplyValidator = vine.compile(
+  vine.object({
+    userId: vine.number().positive(),
+    replyId: vine.number().positive(),
+    text: vine.string().trim().minLength(1),
+  })
+)
+
+export const ReplyReactValidator = vine.compile(
+  vine.object({
+    replyId: vine.number().positive(),
+    userId: vine.number().positive(),
+    reactType: vine.enum(Object.values(ReactType)),
+  })
+)

@@ -52,3 +52,10 @@ router.post('comment-react', [PostsController, 'commentReaction'])
 // // Delete comment
 
 router.delete('delete-comment', [PostsController, 'deletecomment'])
+
+// Routes for Reply and Reply Reactions
+router.post('create-reply', [PostsController, 'createReply'])
+router.get('get-replies', [PostsController, 'getReplies'])
+router.post('update-reply', [PostsController, 'updateReply'])
+router.delete('delete-reply', [PostsController, 'deleteReply'])
+router.post('reply-react', [PostsController, 'replyReaction'])

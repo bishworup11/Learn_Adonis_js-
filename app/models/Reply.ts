@@ -4,7 +4,7 @@ import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { HasMany, BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 import Comment from './Comment.js'
-import ReplyLike from './ReplyLike.js'
+import ReplyReact from './ReplyReact.js'
 
 export default class Reply extends BaseModel {
   @column({ isPrimary: true })
@@ -35,8 +35,8 @@ export default class Reply extends BaseModel {
   })
   declare comment: BelongsTo<typeof Comment>
 
-  @hasMany(() => ReplyLike, {
+  @hasMany(() => ReplyReact, {
     foreignKey: 'replyId',
   })
-  declare likes: HasMany<typeof ReplyLike>
+  declare replyReact: HasMany<typeof ReplyReact>
 }

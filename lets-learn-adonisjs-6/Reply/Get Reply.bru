@@ -1,0 +1,15 @@
+meta {
+  name: Get Reply
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:3333/get-replies?comment=2
+  body: none
+  auth: none
+}
+
+params:query {
+  comment: 2
+}

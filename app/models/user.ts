@@ -6,7 +6,7 @@ import Comment from './Comment.js'
 import Reply from './Reply.js'
 import PostReact from './PostReact.js'
 import CommentReact from './CommentReact.js'
-import ReplyLike from './ReplyLike.js'
+import ReplyReact from './ReplyReact.js'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -46,8 +46,8 @@ export default class User extends BaseModel {
   })
   declare commentLikes: HasMany<typeof CommentReact>
 
-  @hasMany(() => ReplyLike, {
+  @hasMany(() => ReplyReact, {
     foreignKey: 'userId',
   })
-  declare replyLikes: HasMany<typeof ReplyLike>
+  declare replyReacts: HasMany<typeof ReplyReact>
 }
