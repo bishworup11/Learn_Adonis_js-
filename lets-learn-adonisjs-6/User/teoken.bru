@@ -1,0 +1,18 @@
+meta {
+  name: teoken
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://localhost:3333/logout
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "john@example.com",
+    "password": "12345678"
+  }
+}

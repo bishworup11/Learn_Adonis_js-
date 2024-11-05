@@ -27,7 +27,7 @@ export default class PostsController {
           .withCount('postReacts', (q) => q.as('reaction_count'))
           .join('post_categories', 'posts.post_category_id', 'post_categories.post_category_id')
           .where('posts.post_id', postId)
-          .orderBy('postId', 'desc')
+        // .orderBy('postId', 'desc')
 
         response.status(200).send(posts)
       } else {
@@ -37,7 +37,7 @@ export default class PostsController {
           .withCount('comments', (q) => q.as('comment_count'))
           .withCount('postReacts', (q) => q.as('reaction_count'))
           .join('post_categories', 'posts.post_category_id', 'post_categories.post_category_id')
-          .orderBy('postId', 'desc')
+          //.orderBy('postId', 'desc')
           .paginate(page, Number(limit))
 
         response.status(200).send(posts)

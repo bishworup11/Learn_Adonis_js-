@@ -5,6 +5,7 @@ const ReplyController = () => import('#controllers/reply_controller')
 
 import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
+import User from '#models/user'
 
 router.on('/').render('pages/home').as('home')
 
@@ -18,7 +19,11 @@ router.get('users-by-post-count', [UserController, 'getUsersByPostCount'])
 
 // Post routes
 router.get('get-limited-post-catergory', [PostsController, 'getLimitedPostsByCategory'])
-router.get('get-post', [PostsController, 'getPosts'])
+router.get('get-post', [PostsController, 'getPosts']).use(
+  middleware.auth({
+    guards: ['api'],
+  })
+)
 router.post('create-post', [PostsController, 'createPost'])
 router.post('update-post', [PostsController, 'updatePost'])
 router.delete('delete-post', [PostsController, 'deletePost'])
@@ -37,3 +42,18 @@ router.get('get-replies', [ReplyController, 'getReplies'])
 router.post('update-reply', [ReplyController, 'updateReply'])
 router.delete('delete-reply', [ReplyController, 'deleteReply'])
 router.post('reply-react', [ReplyController, 'replyReaction'])
+
+router.post('users/:id/tokens', async ({ params }) => {
+  const user = await User.findOrFail(params.id)
+  const token = await User.accessTokens.create(user)
+
+  return token
+})
+
+/**
+ * response: {
+ *   type: 'bearer',
+ *   value: 'oat_MTA.aWFQUmo2WkQzd3M5cW0zeG5JeHdiaV9rOFQzUWM1aTZSR2xJaDZXYzM5MDE4MzA3NTU',
+ *   expiresAt: null,
+ * }
+ */
