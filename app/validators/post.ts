@@ -119,11 +119,27 @@ export const ReplyReactValidator = vine.compile(
   })
 )
 
-// Add this to your validators/post.js
+// this is user part
 export const getUsersByPostCountValidator = vine.compile(
   vine.object({
     limit: vine.number().positive().optional(),
     page: vine.number().positive().optional(),
     minPosts: vine.number().positive().optional(),
+  })
+)
+
+export const registerValidator = vine.compile(
+  vine.object({
+    firstName: vine.string().trim(),
+    lastName: vine.string().trim(),
+    email: vine.string().email(),
+    password: vine.string().minLength(8),
+  })
+)
+
+export const loginValidator = vine.compile(
+  vine.object({
+    email: vine.string().email(),
+    password: vine.string(),
   })
 )

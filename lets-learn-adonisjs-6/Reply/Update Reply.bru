@@ -6,6 +6,14 @@ meta {
 
 post {
   url: http://localhost:3333/update-reply
-  body: none
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "userId":1,
+    "replyId":2,
+    "text":"update reply III"
+  }
 }

@@ -23,6 +23,9 @@ export default class User extends BaseModel {
   @column()
   declare email: string
 
+  @column({ serializeAs: null })
+  declare password: string
+
   @hasMany(() => Post, {
     foreignKey: 'userId',
   })

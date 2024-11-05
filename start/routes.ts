@@ -1,45 +1,39 @@
-/*
-|--------------------------------------------------------------------------
-| Routes file
-|--------------------------------------------------------------------------
-|
-| The routes file is used for defining the HTTP routes.
-|
-*/
-
 const PostsController = () => import('#controllers/posts_controller')
+const UserController = () => import('#controllers/user_controller')
+const CommentController = () => import('#controllers/comment_controller')
+const ReplyController = () => import('#controllers/reply_controller')
 
 import router from '@adonisjs/core/services/router'
+import { middleware } from './kernel.js'
 
 router.on('/').render('pages/home').as('home')
 
-// Persistent posts array for testing (normally, you'd use a database)
+// User routes
+router.post('/register', [UserController, 'register'])
+router.post('login', [UserController, 'login'])
+// router.post('/logout', [UserController, 'logout']).use(middleware.auth())
+router.post('/logout', [UserController, 'logout'])
+router.get('/user', [UserController, 'getUser']).use(middleware.auth())
+router.get('users-by-post-count', [UserController, 'getUsersByPostCount'])
 
-router.get('login', [PostsController, 'login'])
-//Select users who made the most posts, sorted by post count:
-router.get('users-by-post-count', [PostsController, 'getUsersByPostCount'])
-
-// Post CRUD and all routes
-router.get('get-post', [PostsController, 'getPosts'])
+// Post routes
 router.get('get-limited-post-catergory', [PostsController, 'getLimitedPostsByCategory'])
+router.get('get-post', [PostsController, 'getPosts'])
 router.post('create-post', [PostsController, 'createPost'])
 router.post('update-post', [PostsController, 'updatePost'])
 router.delete('delete-post', [PostsController, 'deletePost'])
-
-// Post Reactions
 router.post('post-react', [PostsController, 'postReaction'])
 
-// Comment CRUD and Comment Reactions
+// Comment routes
+router.post('create-comment', [CommentController, 'createComment'])
+router.get('get-comment', [CommentController, 'getComment'])
+router.post('update-comment', [CommentController, 'updateComment'])
+router.delete('delete-comment', [CommentController, 'deleteComment'])
+router.post('comment-react', [CommentController, 'commentReaction'])
 
-router.post('create-comment', [PostsController, 'createComment'])
-router.get('get-comment', [PostsController, 'getComment'])
-router.post('update-comment', [PostsController, 'updateComment'])
-router.delete('delete-comment', [PostsController, 'deletecomment'])
-router.post('comment-react', [PostsController, 'commentReaction'])
-
-// Routes for Reply and Reply Reactions
-router.post('create-reply', [PostsController, 'createReply'])
-router.get('get-replies', [PostsController, 'getReplies'])
-router.post('update-reply', [PostsController, 'updateReply'])
-router.delete('delete-reply', [PostsController, 'deleteReply'])
-router.post('reply-react', [PostsController, 'replyReaction'])
+// Reply routes
+router.post('create-reply', [ReplyController, 'createReply'])
+router.get('get-replies', [ReplyController, 'getReplies'])
+router.post('update-reply', [ReplyController, 'updateReply'])
+router.delete('delete-reply', [ReplyController, 'deleteReply'])
+router.post('reply-react', [ReplyController, 'replyReaction'])
