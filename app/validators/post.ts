@@ -9,9 +9,9 @@ import Comment from '#models/Comment'
 
 export const createPostValidator = vine.compile(
   vine.object({
-    userId: vine.number().positive(),
-    title: vine.string().trim().minLength(6),
-    category: vine.string().trim().minLength(3),
+    userId: vine.number().positive().optional(),
+    text: vine.string().trim().minLength(6),
+    category: vine.string().trim().minLength(3).optional(),
   })
 )
 
@@ -21,15 +21,15 @@ export const createPostValidator = vine.compile(
 export const updatePostValidator = vine.compile(
   vine.object({
     postId: vine.number().positive(),
-    userId: vine.number().positive(),
-    title: vine.string().trim().minLength(6),
+    userId: vine.number().positive().optional(),
+    text: vine.string().trim().minLength(6),
   })
 )
 
 export const deletePostValidator = vine.compile(
   vine.object({
     postId: vine.number().positive(),
-    userId: vine.number().positive(),
+    userId: vine.number().positive().optional(),
   })
 )
 
@@ -41,6 +41,7 @@ export const getPostValidator = vine.compile(
 
 export const getAllPostsValidator = vine.compile(
   vine.object({
+    userId: vine.number().positive().optional(),
     postId: vine.number().positive().optional(),
     limit: vine.number().positive().optional(),
     page: vine.number().positive().optional(),
@@ -51,14 +52,13 @@ export const getAllPostsValidator = vine.compile(
 export const PostReactValidator = vine.compile(
   vine.object({
     postId: vine.number().positive(),
-    userId: vine.number().positive(),
-    reactType: vine.enum(Object.values(ReactType)),
+    reactType: vine.enum(Object.values(ReactType)).optional(),
   })
 )
 
 export const createCommentValidator = vine.compile(
   vine.object({
-    userId: vine.number().positive(),
+    userId: vine.number().positive().optional(),
     postId: vine.number().positive(),
     text: vine.string().trim().minLength(1),
   })
@@ -82,15 +82,15 @@ export const UpdateCommentValidator = vine.compile(
 export const CommentReactValidator = vine.compile(
   vine.object({
     commentId: vine.number().positive(),
-    userId: vine.number().positive(),
-    reactType: vine.enum(Object.values(ReactType)),
+    userId: vine.number().positive().optional(),
+    reactType: vine.enum(Object.values(ReactType)).optional(),
   })
 )
 
 // Validators for Reply and Reply Reactions
 export const createReplyValidator = vine.compile(
   vine.object({
-    userId: vine.number().positive(),
+    userId: vine.number().positive().optional(),
     commentId: vine.number().positive(),
     text: vine.string().trim().minLength(1),
   })
@@ -114,8 +114,8 @@ export const UpdateReplyValidator = vine.compile(
 export const ReplyReactValidator = vine.compile(
   vine.object({
     replyId: vine.number().positive(),
-    userId: vine.number().positive(),
-    reactType: vine.enum(Object.values(ReactType)),
+    userId: vine.number().positive().optional(),
+    reactType: vine.enum(Object.values(ReactType)).optional(),
   })
 )
 
@@ -130,8 +130,8 @@ export const getUsersByPostCountValidator = vine.compile(
 
 export const registerValidator = vine.compile(
   vine.object({
-    firstName: vine.string().trim(),
-    lastName: vine.string().trim(),
+    firstName: vine.string().trim().minLength(2),
+    lastName: vine.string().trim().minLength(2),
     email: vine.string().email(),
     password: vine.string().minLength(8),
   })

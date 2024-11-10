@@ -1,0 +1,17 @@
+meta {
+  name: delete
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:3333/delete-post
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "postId":117
+  }
+}

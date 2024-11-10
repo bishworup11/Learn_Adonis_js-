@@ -6,6 +6,15 @@ meta {
 
 post {
   url: http://localhost:3333/register
-  body: none
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john@example.com",
+    "password": "12345678"
+  }
 }

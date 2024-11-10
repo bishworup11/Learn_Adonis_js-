@@ -7,44 +7,132 @@ import {
   PostReactValidator,
 } from '../validators/post.js'
 import Post from '#models/post'
-import db from '@adonisjs/lucid/services/db'
 import PostReact from '#models/PostReact'
+import { ReactType } from '#models/ReplyReact'
 
 export default class PostsController {
-  public async getPosts({ response, request }: HttpContext) {
+  public async getPosts({ auth, response, request }: HttpContext) {
     try {
       const validatedData = await getAllPostsValidator.validate(request.all())
       const limit = validatedData.limit ? validatedData.limit : 5
       const page = validatedData.page ? validatedData.page : 1
       const postId = validatedData.postId ? validatedData.postId : null
+      const user = auth.use('web').user!
 
-      //const posts = await db.from('posts').paginate(page, limit)
       if (postId) {
         const posts = await Post.query()
+          .where((builder) => {
+            builder.where('visibility', true).orWhere('user_id', user.userId)
+          })
           .preload('user', (query) => query.select(['userId', 'firstName', 'lastName']))
           .preload('postCategory', (q) => q.select('type'))
+          .preload('comments', (q) =>
+            q.preload('user', (query) => query.select(['userId', 'firstName', 'lastName']))
+          )
+          .preload('postReacts', (q) =>
+            q.preload('user', (query) => query.select(['userId', 'firstName', 'lastName']))
+          )
           .withCount('comments', (q) => q.as('comment_count'))
           .withCount('postReacts', (q) => q.as('reaction_count'))
           .join('post_categories', 'posts.post_category_id', 'post_categories.post_category_id')
           .where('posts.post_id', postId)
-        // .orderBy('postId', 'desc')
+          .orderBy('postId', 'desc')
 
         response.status(200).send(posts)
       } else {
         const posts = await Post.query()
+          .where((builder) => {
+            builder.where('visibility', true).orWhere('user_id', user.userId)
+          })
           .preload('user', (query) => query.select(['userId', 'firstName', 'lastName']))
-          .preload('postCategory', (q) => q.select('type'))
-          .withCount('comments', (q) => q.as('comment_count'))
-          .withCount('postReacts', (q) => q.as('reaction_count'))
-          .join('post_categories', 'posts.post_category_id', 'post_categories.post_category_id')
-          //.orderBy('postId', 'desc')
+          .preload('comments', (q) =>
+            q
+              .preload('user', (query) => query.select(['userId', 'firstName', 'lastName']))
+              .preload('reacts', (q) =>
+                q.preload('user', (query) => query.select(['userId', 'firstName', 'lastName']))
+              )
+              .preload('replies', (q1) =>
+                q1
+                  .preload('user', (q2) => q2.select(['userId', 'firstName', 'lastName']))
+                  .preload('replyReact', (q) =>
+                    q.preload('user', (query) => query.select(['userId', 'firstName', 'lastName']))
+                  )
+              )
+          )
+          .preload('postReacts', (q) =>
+            q.preload('user', (query) => query.select(['userId', 'firstName', 'lastName']))
+          )
+          .orderBy('postId', 'desc')
           .paginate(page, Number(limit))
 
+        //.orderBy('postId', 'desc')
+        // .paginate(page, Number(limit))
+        //.preload('postCategory', (q) => q.select('type'))
         response.status(200).send(posts)
       }
     } catch (error) {
       response.status(500).send({
         message: 'Failed to fetch posts',
+        error: error.message.response,
+      })
+    }
+  }
+
+  public async getPostsByUser({ auth, response, request }: HttpContext) {
+    try {
+      const validatedData = await getAllPostsValidator.validate(request.all())
+      const limit = validatedData.limit ? validatedData.limit : 5
+      const page = validatedData.page ? validatedData.page : 1
+      const userId = validatedData.userId
+      const user = auth.use('web').user!
+
+      // Check if userId is provided
+      if (!userId) {
+        return response.status(400).send({
+          message: 'User ID is required to fetch posts for a specific user',
+        })
+      }
+
+      // Fetch posts for the specified user
+      const posts = await Post.query()
+        .where('user_id', userId)
+        .where((builder) => {
+          builder.where('visibility', true).orWhere('user_id', user.userId)
+        })
+        .preload('user', (query) => query.select(['userId', 'firstName', 'lastName']))
+        .preload('postCategory', (q) => q.select('type'))
+        .preload('comments', (q) =>
+          q
+            .preload('user', (query) => query.select(['userId', 'firstName', 'lastName']))
+            .preload('reacts', (reactsQuery) =>
+              reactsQuery.preload('user', (query) =>
+                query.select(['userId', 'firstName', 'lastName'])
+              )
+            )
+            .preload('replies', (replyQuery) =>
+              replyQuery
+                .preload('user', (userQuery) =>
+                  userQuery.select(['userId', 'firstName', 'lastName'])
+                )
+                .preload('replyReact', (reactQuery) =>
+                  reactQuery.preload('user', (query) =>
+                    query.select(['userId', 'firstName', 'lastName'])
+                  )
+                )
+            )
+        )
+        .preload('postReacts', (q) =>
+          q.preload('user', (query) => query.select(['userId', 'firstName', 'lastName']))
+        )
+        .withCount('comments', (q) => q.as('comment_count'))
+        .withCount('postReacts', (q) => q.as('reaction_count'))
+        .orderBy('postId', 'desc')
+        .paginate(page, Number(limit))
+
+      response.status(200).send(posts)
+    } catch (error) {
+      response.status(500).send({
+        message: 'Failed to fetch posts for the specified user',
         error: error.message,
       })
     }
@@ -84,32 +172,46 @@ export default class PostsController {
     }
   }
 
-  public async createPost({ request, response }: HttpContext) {
+  public async createPost({ auth, request, response }: HttpContext) {
     try {
       const validatedData = await createPostValidator.validate(request.all())
+      const user = auth.use('web').user!
+      // const category = await db
+      //   .from('post_categories')
+      //   .select('post_categories.*')
+      //   .where('post_categories.type', validatedData.category)
 
-      const category = await db
-        .from('post_categories')
-        .select('post_categories.*')
-        .where('post_categories.type', validatedData.category)
+      // // check if category exists
 
-      // check if category exists
-
-      if (category.length === 0) {
-        return response.status(404).send({
-          message: 'Category not found',
-        })
-      }
+      // if (category.length === 0) {
+      //   return response.status(404).send({
+      //     message: 'Category not found',
+      //   })
+      // }
 
       const post = await Post.create({
-        userId: validatedData.userId,
-        text: validatedData.title,
-        postCategoryId: category[0].post_category_id,
+        userId: user.userId,
+        text: validatedData.text,
+        postCategoryId: 1,
       })
+
+      // Reload the post with relationships
+      await post.refresh()
+      await post.load('user')
+      await post.load('postCategory')
 
       return response.status(201).send({
         message: 'Create post successfully',
-        post,
+        post: {
+          ...post.serialize(),
+          user: {
+            userId: user.userId,
+            firstName: user.firstName,
+            lastName: user.lastName,
+          },
+          comments: [],
+          postReacts: [],
+        },
       })
     } catch (error) {
       return response.status(400).send({
@@ -119,12 +221,11 @@ export default class PostsController {
     }
   }
 
-  public async updatePost({ request, response }: HttpContext) {
+  public async updatePost({ auth, request, response }: HttpContext) {
     const validatedData = await updatePostValidator.validate(request.all())
     const postId: number = validatedData.postId
-    const userId: number = validatedData.userId
-    const newPostTitle: string = validatedData.title
-
+    const newPostTitle: string = validatedData.text
+    const user = auth.use('web').user!
     const post = await Post.findOrFail(postId)
 
     if (!post) {
@@ -133,7 +234,9 @@ export default class PostsController {
       })
     }
 
-    if (post.userId !== userId) {
+    //  console.log(user, post.userId)
+
+    if (!user || post.userId !== user.userId) {
       return response.status(403).send({
         message: 'You are not authorized to update this post',
       })
@@ -147,20 +250,22 @@ export default class PostsController {
     })
   }
 
-  public async deletePost({ request, response }: HttpContext) {
+  public async deletePost({ auth, request, response }: HttpContext) {
     const validatedData = await deletePostValidator.validate(request.all())
     const postId: number = validatedData.postId
-    const userId: number = validatedData.userId
+    //const userId: number = validatedData.userId
 
     const post = await Post.findOrFail(postId)
+    const user = auth.use('web').user!
 
+    console.log(user, post.userId)
     if (!post) {
       return response.status(404).send({
         message: 'Post not found',
       })
     }
 
-    if (post.userId !== userId) {
+    if (post.userId !== user.userId) {
       return response.status(403).send({
         message: 'You are not authorized to delete this post',
       })
@@ -173,10 +278,11 @@ export default class PostsController {
     })
   }
 
-  public async postReaction({ request, response }: HttpContext) {
+  public async postReaction({ auth, request, response }: HttpContext) {
     const validatedData = await PostReactValidator.validate(request.all())
     const postId: number = validatedData.postId
-    const userId: number = validatedData.userId
+    const reactType: ReactType = validatedData.reactType ?? ReactType.LIKE
+    const user = auth.use('web').user!
 
     const post = await Post.findOrFail(postId)
 
@@ -188,26 +294,63 @@ export default class PostsController {
 
     const postReact = await PostReact.query()
       .where('postId', postId)
-      .andWhere('userId', userId)
+      .andWhere('userId', user.userId)
       .first()
 
     if (!postReact) {
       const postReactCreated = await PostReact.create({
-        userId: validatedData.userId,
+        userId: user.userId,
         postId: validatedData.postId,
-        reactType: validatedData.reactType,
+        reactType: reactType,
       })
 
       response.status(200).send({
         message: ' React  successfully',
-        postReactCreated,
+        userId: user.userId,
+        postReactCreated: {
+          ...postReactCreated.serialize(),
+          user: {
+            userId: user.userId,
+            firstName: user.firstName,
+            lastName: user.lastName,
+          },
+        },
       })
     } else {
       await postReact.delete()
 
       response.status(200).send({
         message: 'undo react  successfully',
+        userId: user.userId,
       })
     }
+  }
+
+  public async postHide({ auth, request, response }: HttpContext) {
+    const validatedData = await PostReactValidator.validate(request.all())
+    const postId: number = validatedData.postId
+
+    const user = auth.use('web').user!
+
+    const post = await Post.findOrFail(postId)
+
+    if (!post) {
+      return response.status(404).send({
+        message: 'Post not found',
+      })
+    }
+
+    if (!user || post.userId !== user.userId) {
+      return response.status(403).send({
+        message: 'You are not authorized to update this post',
+      })
+    }
+
+    post.visibility = !post.visibility
+    await post.save()
+    response.status(200).send({
+      message: 'Update post Visibility successfully',
+      post,
+    })
   }
 }

@@ -64,7 +64,11 @@ export default class UserController {
 
       // Login user
       await auth.use('web').login(user)
-      //const token = await User.accessTokens.create(user)
+      // return true
+      // //const token = await User.accessTokens.create(user)
+      // // const user = await User.findOrFail(params.id)
+      // const token = await User.accessTokens.create(user)
+      // console.log(token)
 
       return response.status(200).send({
         message: 'Login successful',
@@ -80,9 +84,49 @@ export default class UserController {
 
   public async logout({ auth, response }: HttpContext) {
     await auth.use('web').logout()
+    //return true;
+
+    // console.log(auth.user) // User
+    // console.log(auth.authenticatedViaGuard) // 'api'
+    // console.log(auth.user!.currentAccessToken)
+
+    // if ('currentAccessToken' in auth.user!) {
+    //   const token = auth.user!.currentAccessToken.identifier
+    //   if (!token) {
+    //     return response.badRequest({ message: 'Token not found' })
+    //   }
+    //   // await User.accessTokens.delete(auth.user!, token)
+    // } else {
+    //   return response.badRequest({ message: 'Access token not available' })
+    // }
+
     return response.status(200).send({
       message: 'Logged out successfully',
     })
+  }
+
+  public async getUserTokens({ auth, response }: HttpContext) {
+    try {
+      const user = auth.use('api').user
+
+      if (!user) {
+        return response.status(401).send({
+          message: 'Not authenticated',
+        })
+      }
+
+      const tokens = await User.accessTokens.all(user)
+      console.log(tokens)
+
+      return response.ok({
+        tokens: tokens,
+      })
+    } catch (error) {
+      return response.status(500).send({
+        message: 'Failed to get tokens',
+        error: error.message,
+      })
+    }
   }
 
   public async getUser({ auth, response }: HttpContext) {
@@ -96,6 +140,7 @@ export default class UserController {
 
       return response.status(200).send({
         user: user,
+       // userId: user.userId,
       })
     } catch (error) {
       return response.status(401).send({

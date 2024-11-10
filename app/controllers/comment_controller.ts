@@ -6,22 +6,34 @@ import {
   CommentReactValidator,
 } from '../validators/post.js'
 import Comment from '#models/Comment'
-import CommentReact from '#models/CommentReact'
+import CommentReact, { ReactType } from '#models/CommentReact'
 
 export default class CommentController {
-  public async createComment({ request, response }: HttpContext) {
+  public async createComment({ auth, request, response }: HttpContext) {
     try {
       const validatedData = await createCommentValidator.validate(request.all())
-
+      const user = auth.use('web').user!
       const newComment = await Comment.create({
-        userId: validatedData.userId,
+        userId: user.userId,
         postId: validatedData.postId,
         text: validatedData.text,
       })
 
+      await newComment.refresh()
+      await newComment.load('user')
+
       return response.status(201).send({
         message: 'Comment successfully',
-        newComment,
+        newComment: {
+          ...newComment.serialize(),
+          user: {
+            userId: user.userId,
+            firstName: user.firstName,
+            lastName: user.lastName,
+          },
+          reacts: [],
+          replies: [],
+        },
       })
     } catch (error) {
       return response.status(400).send({
@@ -109,11 +121,11 @@ export default class CommentController {
     })
   }
 
-  public async commentReaction({ request, response }: HttpContext) {
+  public async commentReaction({ auth, request, response }: HttpContext) {
     const validatedData = await CommentReactValidator.validate(request.all())
     const commentId: number = validatedData.commentId
-    const userId: number = validatedData.userId
-
+    const reactType: ReactType = validatedData.reactType ?? ReactType.LIKE
+    const user = auth.use('web').user!
     const comment = await Comment.findOrFail(commentId)
 
     if (!comment) {
@@ -124,7 +136,7 @@ export default class CommentController {
 
     const commentReact = await CommentReact.query()
       .where('commentId', commentId)
-      .andWhere('userId', userId)
+      .andWhere('userId', user.userId)
       .first()
 
     if (commentReact) {
@@ -132,19 +144,30 @@ export default class CommentController {
 
       return response.status(200).send({
         message: 'Undo react successfully',
+        userId: user.userId,
         commentReact,
       })
     }
 
     const commentReactCreated = await CommentReact.create({
-      userId: validatedData.userId,
+      userId: user.userId,
       commentId: validatedData.commentId,
-      reactType: validatedData.reactType,
+      reactType: reactType,
     })
+
+    await commentReactCreated.refresh()
+    await commentReactCreated.load('user')
 
     return response.status(200).send({
       message: 'Reacted successfully',
-      commentReactCreated,
+      commentReact: {
+        ...commentReactCreated.serialize(),
+        user: {
+          userId: user.userId,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+      },
     })
   }
 }

@@ -57,7 +57,8 @@ export default class User extends BaseModel {
   })
   declare replyReacts: HasMany<typeof ReplyReact>
 
-  // static accessTokens = DbAccessTokensProvider.forModel(User)
+
+  
   static accessTokens = DbAccessTokensProvider.forModel(User, {
     expiresIn: '30 days',
     prefix: 'oat_',

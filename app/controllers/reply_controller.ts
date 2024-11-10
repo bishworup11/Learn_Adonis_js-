@@ -6,22 +6,35 @@ import {
   ReplyReactValidator,
 } from '../validators/post.js'
 import Reply from '#models/Reply'
-import ReplyReact from '#models/ReplyReact'
+import ReplyReact, { ReactType } from '#models/ReplyReact'
 
 export default class ReplyController {
-  public async createReply({ request, response }: HttpContext) {
+  public async createReply({ auth, request, response }: HttpContext) {
     try {
       const validatedData = await createReplyValidator.validate(request.all())
 
+      const user = auth.use('web').user!
+
       const newReply = await Reply.create({
-        userId: validatedData.userId,
+        userId: user.userId,
         commentId: validatedData.commentId,
         text: validatedData.text,
       })
 
+      await newReply.refresh()
+      await newReply.load('user')
+
       return response.status(201).send({
         message: 'Reply created successfully',
-        newReply,
+        newReply: {
+          ...newReply.serialize(),
+          user: {
+            userId: user.userId,
+            firstName: user.firstName,
+            lastName: user.lastName,
+          },
+          replyReact: [],
+        },
       })
     } catch (error) {
       return response.status(400).send({
@@ -111,10 +124,11 @@ export default class ReplyController {
     })
   }
 
-  public async replyReaction({ request, response }: HttpContext) {
+  public async replyReaction({ auth, request, response }: HttpContext) {
     const validatedData = await ReplyReactValidator.validate(request.all())
     const replyId: number = validatedData.replyId
-    const userId: number = validatedData.userId
+    const reactType: ReactType = validatedData.reactType ?? ReactType.LIKE
+    const user = auth.use('web').user!
 
     const reply = await Reply.findOrFail(replyId)
 
@@ -126,7 +140,7 @@ export default class ReplyController {
 
     const replyReact = await ReplyReact.query()
       .where('replyId', replyId)
-      .andWhere('userId', userId)
+      .andWhere('userId', user.userId)
       .first()
 
     if (replyReact) {
@@ -134,19 +148,28 @@ export default class ReplyController {
 
       return response.status(200).send({
         message: 'Undo react successfully',
-        replyReact,
+        replyReactCreated: replyReact,
       })
     }
 
     const replyReactCreated = await ReplyReact.create({
-      userId: validatedData.userId,
+      userId: user.userId,
       replyId: validatedData.replyId,
-      reactType: validatedData.reactType,
+      reactType: reactType,
     })
+    await replyReactCreated.refresh()
+    await replyReactCreated.load('user')
 
     return response.status(200).send({
       message: 'Reacted successfully',
-      replyReactCreated,
+      replyReactCreated: {
+        ...replyReactCreated.serialize(),
+        user: {
+          userId: user.userId,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+      },
     })
   }
 }
