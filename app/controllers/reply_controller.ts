@@ -4,7 +4,7 @@ import {
   deleteReplyValidator,
   UpdateReplyValidator,
   ReplyReactValidator,
-} from '../validators/post.js'
+} from '../validators/reply.js'
 import Reply from '#models/Reply'
 import ReplyReact, { ReactType } from '#models/ReplyReact'
 

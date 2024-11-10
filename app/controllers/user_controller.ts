@@ -3,10 +3,9 @@ import {
   getUsersByPostCountValidator,
   loginValidator,
   registerValidator,
-} from '../validators/post.js'
+} from '../validators/user.js'
 import User from '#models/user'
 import hash from '@adonisjs/core/services/hash'
-//import db from '@adonisjs/lucid/services/db'
 
 export default class UserController {
   public async register({ request, response }: HttpContext) {
@@ -140,7 +139,7 @@ export default class UserController {
 
       return response.status(200).send({
         user: user,
-       // userId: user.userId,
+        // userId: user.userId,
       })
     } catch (error) {
       return response.status(401).send({

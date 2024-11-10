@@ -4,7 +4,7 @@ import {
   deleteCommentValidator,
   UpdateCommentValidator,
   CommentReactValidator,
-} from '../validators/post.js'
+} from '../validators/comment.js'
 import Comment from '#models/Comment'
 import CommentReact, { ReactType } from '#models/CommentReact'
 
@@ -67,7 +67,7 @@ export default class CommentController {
   public async deleteComment({ request, response }: HttpContext) {
     const validatedData = await deleteCommentValidator.validate(request.all())
     const userId: number = validatedData.userId
-    const commentId: number = validatedData.CommentId
+    const commentId: number = validatedData.commentId
 
     const comment = await Comment.query()
       .preload('user', (query) => query.select(['userId', 'firstName', 'lastName']))

@@ -1,11 +1,7 @@
 import vine from '@vinejs/vine'
-
-import { ReactType } from '../models/PostReact.js'
 import Comment from '#models/Comment'
+import { ReactType } from '#models/ReplyReact'
 
-/**
- * Validates the post's creation action
- */
 
 export const createPostValidator = vine.compile(
   vine.object({
@@ -15,9 +11,6 @@ export const createPostValidator = vine.compile(
   })
 )
 
-/**
- * Validates the post's update action
- */
 export const updatePostValidator = vine.compile(
   vine.object({
     postId: vine.number().positive(),
