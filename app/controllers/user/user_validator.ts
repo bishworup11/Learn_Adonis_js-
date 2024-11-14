@@ -18,7 +18,13 @@ export const registerValidator = vine.compile(
   vine.object({
     firstName: vine.string().trim().minLength(2),
     lastName: vine.string().trim().minLength(2),
-    email: vine.string().email(),
+    email: vine
+      .string()
+      .email()
+      .exists(async (db, value, field) => {
+        const user = await db.from('users').where('email', value).first()
+        return !user // Return true if no user exists with this email, otherwise false
+      }),
     password: vine.string().minLength(8),
   })
 )

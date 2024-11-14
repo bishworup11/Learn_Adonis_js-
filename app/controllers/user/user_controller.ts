@@ -5,6 +5,7 @@ import {
   registerValidator,
 } from './user_validator.js'
 import UserService from './user_service.js'
+import db from '@adonisjs/lucid/services/db'
 
 export default class UserController {
   private userService: UserService
@@ -44,6 +45,46 @@ export default class UserController {
     } catch (error) {
       return response.status(400).send({
         message: 'Failed to login',
+        errors: error.messages || error.message,
+      })
+    }
+  }
+
+  public async practice({ request, response, auth }: HttpContext) {
+    try {
+      // const userCurrent = auth.use('web').user!
+      const results = await db
+        .from('posts')
+        .join('users', 'users.user_id', '=', 'posts.user_id')
+        .leftJoin('post_reacts', 'posts.post_id', '=', 'post_reacts.post_id')
+        .leftJoin('comments', 'posts.post_id', '=', 'comments.post_id')
+        .select([
+          'posts.post_id',
+          db.raw("CONCAT(users.first_name, ' ', users.last_name) as username"),
+          db.raw('COUNT(DISTINCT post_reacts.post_react_id) as total_reactions'),
+          db.raw('COUNT(DISTINCT comments.comment_id) as total_comments'),
+        ])
+        .groupBy(['posts.post_id', 'users.user_id'])
+        .orderBy([
+          {
+            column: 'username',
+            order: 'asc',
+          },
+          {
+            column: 'total_reactions',
+            order: 'desc',
+          },
+        ])
+
+      // const users = await db.rawQuery('select * from users')
+
+      return response.status(200).send({
+        message: 'practice successful',
+        results,
+      })
+    } catch (error) {
+      return response.status(400).send({
+        message: 'Failed to practice',
         errors: error.messages || error.message,
       })
     }

@@ -1,657 +1,260 @@
-# Learn Adonis js
+# Social Posts API Documentation
+A RESTful API built with AdonisJS 6 for managing user posts, reactions, and authentication.
 
-## Day 1
+## Table of Contents
+- [Requirements](#requirements)
+- [Setup & Installation](#setup--installation)
+- [Project Structure](#project-structure)
+- [Authentication](#authentication)
+- [API Endpoints](#api-endpoints)
 
-### 1. Install Adonis js
+## Requirements
+- Node.js >= 18.0.0
+- npm >= 8.0.0
 
-<details>
- <summary><b> 2. Create Crud in router.ts with Global variable </b></summary>
+## Setup & Installation
 
-```ts
-router.get('login', (ctx) => {
-  const csrfToken = ctx.request.csrfToken
-
-  // ctx.response.send({ csrfToken })
-  ctx.response.status(200).send(csrfToken)
-})
-
-// all posts get
-
-router.get('get-posts', (ctx) => {
-  const posts = [
-    {
-      id: 1,
-      title: 'Hello World',
-    },
-    {
-      id: 2,
-      title: 'Hello World 2',
-    },
-  ]
-  ctx.response.status(200).send(posts)
-})
-
-// create post
-router.post('create-posts', (ctx) => {
-  const posts = [
-    {
-      id: 1,
-      title: 'Hello World',
-    },
-    {
-      id: 2,
-      title: 'Hello World 2',
-    },
-  ]
-
-  const newPostTitle = ctx.request.input('title')
-
-  const newPost = {
-    id: 3,
-    title: newPostTitle,
-  }
-
-  posts.push(newPost)
-
-  ctx.response.status(201).send({
-    message: 'Create post successfully',
-    posts: posts,
-    newPost: newPost,
-  })
-})
-
-// update post
-router.post('update-posts', (ctx) => {
-  const posts = [
-    {
-      id: 1,
-      title: 'Hello World',
-    },
-    {
-      id: 2,
-      title: 'Hello World 2',
-    },
-    {
-      id: 3,
-      title: 'Post 3 2',
-    },
-  ]
-
-  const postId = ctx.request.input('id')
-  const newPostTitle = ctx.request.input('title')
-
-  const post = posts.find((post) => post.id === postId)
-
-  if (!post) {
-    return ctx.response.status(404).send({
-      message: 'Post not found',
-    })
-  }
-
-  post.title = newPostTitle
-  // update post in database
-  posts.splice(posts.indexOf(post), 1, post)
-
-  ctx.response.status(201).send({
-    message: 'Update post successfully',
-    posts: posts,
-    post: post,
-  })
-})
-
-// delete post
-router.delete('delete-posts', (ctx) => {
-  const posts = [
-    {
-      id: 1,
-      title: 'Hello World',
-    },
-    {
-      id: 2,
-      title: 'Hello World 2',
-    },
-    {
-      id: 3,
-      title: 'Post 3 2',
-    },
-  ]
-
-  const postId = ctx.request.input('id')
-
-  // select post from database
-  const post = posts.find((post) => post.id === postId)
-
-  // if post not found, return error | validation
-  if (!post) {
-    return ctx.response.status(404).send({
-      message: 'Post not found',
-    })
-  }
-
-  // delete post from database
-  posts.splice(posts.indexOf(post), 1)
-
-  ctx.response.status(201).send({
-    message: 'Delete post successfully',
-    post: post,
-  })
-})
+1. Clone the repository:
+```bash
+git clone https://github.com/bishworup11/Learn_Adonis_js-.git
+cd Learn_Adonis_js
 ```
 
-</details>
-
-<details>
- <summary><b> 3. Routes Break down to controller add validation </b></summary>
-
-- routes.ts
-
-```ts
-router.get('login', [PostsController, 'login'])
-
-// // Get all posts
-router.get('get-posts', [PostsController, 'getPosts'])
-
-// // Create post
-
-router.post('create-post', [PostsController, 'createPost'])
-
-// // Update post
-
-router.post('update-post', [PostsController, 'updatePost'])
-
-// // Delete post
-
-router.delete('delete-post', [PostsController, 'deletePost'])
+2. Install dependencies:
+```bash
+npm install
 ```
 
-- app/controller/post_controller.ts
+3. Create environment file:
+```bash
+cp .env.example .env
+```
 
-```ts
-import { Context } from 'egg'
+4. Configure your `.env` file:
+```env
+PORT=3333
+HOST=0.0.0.0
+NODE_ENV=development
+APP_KEY=<your-app-key>
+DB_CONNECTION=pg
+PG_HOST=localhost
+PG_PORT=5432
+PG_USER=<your-db-user>
+PG_PASSWORD=<your-db-password>
+PG_DB_NAME=<your-db-name>
+```
 
-import { HttpContext } from '@adonisjs/core/http'
-import { createPostValidator, updatePostValidator } from '../validators/post.js'
+5. Run migrations:
+```bash
+node ace migration:run
+```
 
-const posts = [
-  { id: 1, title: 'Hello World' },
-  { id: 2, title: 'Hello World 2' },
-]
+6. Start the development server:
+```bash
+node ace serve --watch
+```
 
-export default class PostsController {
-  public async login(ctx: HttpContext) {
-    const csrfToken = ctx.request.csrfToken
-    ctx.response.status(200).send(csrfToken)
-  }
 
-  public async getPosts(ctx: HttpContext) {
-    ctx.response.status(200).send(posts)
-  }
+## Authentication
+The API uses AdonisJS built-in authentication middleware. Two authentication guards are available:
+- `web`: For session-based authentication
+- `api`: For token-based authentication
 
-  public async createPost({ request, response }: HttpContext) {
-    try {
-      // Validate the request using the createPostValidator
-      const validatedData = await createPostValidator.validate(request.all())
+## API Endpoints
 
-      // Create a new post object using the validated title
-      const newPost = {
-        id: posts.length + 1, // Dynamic ID generation
-        title: validatedData.title, // Use the validated title
-      }
+### User Management
 
-      // Add the new post to the posts array
-      posts.push(newPost)
+#### Register User
+```
+POST /user/register
+```
+Creates a new user account.
 
-      // Send a success response
-      return response.status(201).send({
-        message: 'Create post successfully',
-        posts,
-        newPost,
-      })
-    } catch (error) {
-      // Handle validation errors
-      return response.status(400).send({
-        message: 'Validation failed',
-        errors: error.messages, // Return the validation error messages
-      })
-    }
-  }
+#### Login
+```
+POST /user/login
+```
+Authenticates a user and creates a session.
 
-  public async updatePost({ request, response }: HttpContext) {
-    const postId: number = request.input('id')
-    const newPostTitle: string = request.input('title')
+#### Logout
+```
+POST /user/logout
+```
+Ends the current user session.
+**Requires Authentication**
 
-    const post = posts.find((post) => post.id === postId)
+#### Get User Profile
+```
+GET /user
+```
+Retrieves the current user's profile.
+**Requires Authentication**
 
-    if (!post) {
-      return response.status(404).send({
-        message: 'Post not found',
-      })
-    }
+#### Get Users by Post Count
+```
+GET /users-by-post-count
+```
+Retrieves users sorted by their post count.
 
-    post.title = newPostTitle
-    response.status(200).send({
-      message: 'Update post successfully',
-      posts,
-      post,
-    })
-  }
+#### Get User Tokens
+```
+GET /tokens
+```
+Retrieves user API tokens.
+**Requires API Authentication**
 
-  public async deletePost({ request, response }: HttpContext) {
-    const postId: number = request.input('id')
+### Post Management
 
-    const postIndex = posts.findIndex((post) => post.id === postId)
+All post management routes require authentication.
 
-    if (postIndex === -1) {
-      return response.status(404).send({
-        message: 'Post not found',
-      })
-    }
+#### Get Posts
+```
+GET /get-post
+```
+Query Parameters:
+- `limit` (optional): Number of posts to retrieve
+- `page` (optional): Page number for pagination
+- `postId` (optional): Specific post ID to retrieve
 
-    const deletedPost = posts.splice(postIndex, 1)[0] // Remove post and get the deleted post
+#### Get Posts by User
+```
+GET /get-post-user
+```
+Query Parameters:
+- `userId` (required): ID of the user whose posts to retrieve
+- `limit` (optional): Number of posts to retrieve
+- `page` (optional): Page number for pagination
 
-    response.status(200).send({
-      message: 'Delete post successfully',
-      post: deletedPost,
-    })
-  }
+#### Create Post
+```
+POST /create-post
+```
+Request Body:
+- `text`: Content of the post
+- Additional fields based on validator requirements
+
+#### Update Post
+```
+POST /update-post
+```
+Request Body:
+- `postId`: ID of the post to update
+- `text`: Updated content
+
+#### Delete Post
+```
+POST /delete-post
+```
+Request Body:
+- `postId`: ID of the post to delete
+
+#### React to Post
+```
+POST /post-react
+```
+Request Body:
+- `postId`: ID of the post to react to
+- `reactType`: Type of reaction
+
+#### Toggle Post Visibility
+```
+POST /post-visibility
+```
+Request Body:
+- `postId`: ID of the post to toggle visibility
+
+## Error Handling
+
+The API returns appropriate HTTP status codes:
+- 200: Success
+- 201: Created
+- 400: Bad Request
+- 401: Unauthorized
+- 403: Forbidden
+- 404: Not Found
+- 500: Internal Server Error
+
+Error responses follow this format:
+```json
+{
+  "message": "Error description",
+  "error": "Detailed error message (if available)"
 }
 ```
 
-- app/validator/post.ts
+## Development Notes
 
-```ts
-import vine from '@vinejs/vine'
+1. The project uses TypeScript for better type safety and developer experience.
+2. Validators are implemented for all routes to ensure data integrity.
+3. Business logic is separated into service classes for better maintainability.
+4. Authentication middleware is applied at both group and individual route levels.
 
-/**
- * Validates the post's creation action
- */
-export const createPostValidator = vine.compile(
-  vine.object({
-    title: vine.string().trim().minLength(6),
-  })
-)
+## Testing
 
-/**
- * Validates the post's update action
- */
-export const updatePostValidator = vine.compile(
-  vine.object({
-    id: vine.number().positive(),
-    title: vine.string().trim().minLength(6),
-    description: vine.string().trim().escape(),
-  })
-)
-
-export const deletePostValidator = vine.compile(
-  vine.object({
-    id: vine.number().positive(),
-  })
-)
-
-export const getPostValidator = vine.compile(
-  vine.object({
-    id: vine.number().positive(),
-  })
-)
+To run tests (assuming they are set up):
+```bash
+node ace test
 ```
 
-</details>
+## Additional Configuration
 
-## Day 2
-
-<details>
-<summary>Connent MySQL database , Create Post model, User model and database migration</summary>
-
-- app/models/post.ts
-
-```ts
-// app/Models/User.ts
-import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
-import type { HasMany } from '@adonisjs/lucid/types/relations'
-import Post from './post.js'
-import Comment from './Comment.js'
-import Reply from './Reply.js'
-import PostLike from './PostLike.js'
-import CommentLike from './CommentLike.js'
-import ReplyLike from './ReplyLike.js'
-
-export default class User extends BaseModel {
-  @column({ isPrimary: true })
-  declare userId: number
-
-  @column()
-  declare firstName: string
-
-  @column()
-  declare lastName: string
-
-  @column()
-  declare email: string
-
-  @hasMany(() => Post, {
-    foreignKey: 'userId',
-  })
-  declare posts: HasMany<typeof Post>
-
-  @hasMany(() => Comment, {
-    foreignKey: 'userId',
-  })
-  declare comments: HasMany<typeof Comment>
-
-  @hasMany(() => Reply, {
-    foreignKey: 'userId',
-  })
-  declare replies: HasMany<typeof Reply>
-
-  @hasMany(() => PostLike, {
-    foreignKey: 'userId',
-  })
-  declare postLikes: HasMany<typeof PostLike>
-
-  @hasMany(() => CommentLike, {
-    foreignKey: 'userId',
-  })
-  declare commentLikes: HasMany<typeof CommentLike>
-
-  @hasMany(() => ReplyLike, {
-    foreignKey: 'userId',
-  })
-  declare replyLikes: HasMany<typeof ReplyLike>
+### Database Configuration
+Configure your database in `config/database.ts`:
+```typescript
+{
+  connection: Env.get('DB_CONNECTION'),
+  connections: {
+    pg: {
+      client: 'pg',
+      connection: {
+        host: Env.get('PG_HOST'),
+        port: Env.get('PG_PORT'),
+        user: Env.get('PG_USER'),
+        password: Env.get('PG_PASSWORD'),
+        database: Env.get('PG_DB_NAME'),
+      },
+      migrations: {
+        naturalSort: true,
+      },
+      healthCheck: true,
+      debug: false,
+    },
+  },
 }
 ```
 
-- database/migrations/[timestamp]-create-user.js
+### Middleware Configuration
+Ensure your middleware is properly configured in `start/kernel.ts`.
 
-```ts
-import { BaseSchema } from '@adonisjs/lucid/schema'
+## Production Deployment
 
-export default class extends BaseSchema {
-  protected tableName = 'users'
-
-  async up() {
-    this.schema.createTable(this.tableName, (table) => {
-      table.increments('user_id').primary() // Primary key
-      table.string('first_name').notNullable() // First name
-      table.string('last_name').notNullable() // Last name
-      table.string('email').notNullable().unique() // Email, unique constraint
-      table.timestamp('created_at').defaultTo(this.raw('CURRENT_TIMESTAMP')) // Created at timestamp
-      table
-        .timestamp('updated_at')
-        .defaultTo(this.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')) // Updated at timestamp
-    })
-  }
-
-  async down() {
-    this.schema.dropTable(this.tableName)
-  }
-}
+1. Build the project:
+```bash
+node ace build
 ```
 
-- app/Models/post.ts
+2. Set environment variables for production.
 
-```ts
-// app/Models/Post.ts
-import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
-import type { HasMany, BelongsTo } from '@adonisjs/lucid/types/relations'
-import User from './user.js'
-import Comment from './Comment.js'
-import PostLike from './PostLike.js'
-
-export default class Post extends BaseModel {
-  @column({ isPrimary: true })
-  declare postId: number
-
-  @column()
-  declare userId: number
-
-  @column()
-  declare postCategoryId: number
-
-  @column()
-  declare text: string
-
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
-
-  @belongsTo(() => User, {
-    foreignKey: 'userId',
-  })
-  declare user: BelongsTo<typeof User>
-
-  @hasMany(() => Comment, {
-    foreignKey: 'postId',
-  })
-  declare comments: HasMany<typeof Comment>
-
-  @hasMany(() => PostLike, {
-    foreignKey: 'postId',
-  })
-  declare likes: HasMany<typeof PostLike>
-}
+3. Run migrations:
+```bash
+node ace migration:run --force
 ```
 
--- database/migrations/[timestamp]\_create_posts_table.js
-
-```ts
-import { BaseSchema } from '@adonisjs/lucid/schema'
-
-export default class extends BaseSchema {
-  protected tableName = 'posts'
-
-  async up() {
-    this.schema.createTable(this.tableName, (table) => {
-      table.increments('post_id').primary()
-      table.integer('user_id').unsigned().references('user_id').inTable('users').onDelete('CASCADE')
-      table.string('text').notNullable()
-      table.timestamp('created_at').defaultTo(this.raw('CURRENT_TIMESTAMP'))
-      table
-        .timestamp('updated_at')
-        .defaultTo(this.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    })
-  }
-
-  async down() {
-    this.schema.dropTable(this.tableName)
-  }
-}
+4. Start the server:
+```bash
+cd build
+node server.js
 ```
 
-#### update posts_controller.ts
+## Contributing
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-```ts
-import { HttpContext } from '@adonisjs/core/http'
-import { createPostValidator, updatePostValidator } from '../validators/post.js'
-import Post from '#models/post'
-import db from '@adonisjs/lucid/services/db'
-
-export default class PostsController {
-  public async login(ctx: HttpContext) {
-    const csrfToken = ctx.request.csrfToken
-    ctx.response.status(200).send(csrfToken)
-  }
-
-  public async getPosts({ response, request }: HttpContext) {
-    try {
-      const posts = await Post.all()
-
-      response.status(200).send(posts)
-    } catch (error) {
-      response.status(500).send({
-        message: 'Failed to fetch posts',
-        error: error.message,
-      })
-    }
-  }
-
-  public async createPost({ request, response }: HttpContext) {
-    try {
-      const validatedData = await createPostValidator.validate(request.all())
-
-      const post = await Post.create({
-        userId: 1,
-        text: validatedData.title,
-      })
-
-      return response.status(201).send({
-        message: 'Create post successfully',
-        post,
-      })
-    } catch (error) {
-      return response.status(400).send({
-        message: 'Validation failed',
-        errors: error.messages,
-      })
-    }
-  }
-
-  public async updatePost({ request, response }: HttpContext) {
-    const validatedData = await updatePostValidator.validate(request.all())
-    const postId: number = validatedData.id
-    const newPostTitle: string = validatedData.title
-
-    const post = await Post.findOrFail(postId)
-
-    if (!post) {
-      return response.status(404).send({
-        message: 'Post not found',
-      })
-    }
-
-    post.text = newPostTitle
-    response.status(200).send({
-      message: 'Update post successfully',
-      post,
-    })
-  }
-
-  public async deletePost({ request, response }: HttpContext) {
-    const postId: number = request.input('id')
-
-    const post = await Post.findOrFail(postId)
-
-    if (!post) {
-      return response.status(404).send({
-        message: 'Post not found',
-      })
-    }
-
-    await post.delete()
-
-    response.status(200).send({
-      message: 'Delete post successfully',
-      deletedPost: post,
-    })
-  }
-}
-```
-
-</details>
-
-<details>
-<summary> Add pagination </summary>
-
-- update posts_controller.ts
-
-```ts
-
-public async getPosts({ response, request }: HttpContext) {
-    try {
-      // const posts = await Post.all()
-      const page = request.input('page', 1)
-      const limit = request.input('limit', 10)
-
-      const posts = await db.from('posts').paginate(page, limit)
-      console.log(posts)
-
-      response.status(200).send(posts)
-    } catch (error) {
-      response.status(500).send({
-        message: 'Failed to fetch posts',
-        error: error.message,
-      })
-    }
-  }
-
-```
-
-</details>
-
-<details>
-<summary> Add Category table and relation one to many with posts table </summary>
-
-- app/models/post.ts
-
-add this in post,ts
-
-```ts
-
-  @belongsTo(() => PostCategory, {
-    foreignKey: 'postCategoryId',
-  })
-  declare postCategory: BelongsTo<typeof PostCategory>
-
-
-```
-
-- app/models/PostCategory.ts
-
-```ts
-import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
-import type { HasMany } from '@adonisjs/lucid/types/relations'
-import Post from './post.js'
-
-export default class PostCategory extends BaseModel {
-  @column({ isPrimary: true })
-  declare postCategoryId: number
-
-  @column()
-  declare type: string
-
-  @hasMany(() => Post, {
-    foreignKey: 'postCategoryId',
-  })
-  declare posts: HasMany<typeof Post>
-}
-```
-
-get all posts with category
-
-- app/Controllers/Http/PostsController.ts
-
-```ts
-
- public async getLimitedPosts({ response, request }: HttpContext) {
-    try {
-      // const posts = await Post.all()
-      const limit = request.input('limit', 5)
-      const page = request.input('page', 1)
-      const type = 'Technology'
-
-      const posts = await db
-        .from('posts')
-        .select(
-          'posts.*', // All columns from posts table
-          'post_categories.type as category_type' // Only 'type' column from post_categories
-        )
-        .join('post_categories', 'posts.post_category_id', 'post_categories.post_category_id')
-        .where('post_categories.type', type)
-        .paginate(page, Number(limit))
-
-      response.status(200).send(posts)
-    } catch (error) {
-      response.status(500).send({
-        message: 'Failed to fetch posts',
-        error: error.message,
-      })
-    }
-  }
-
-```
-
-</details>
-
-## Day 3
+## Security Considerations
+- Always use HTTPS in production
+- Implement rate limiting
+- Keep dependencies updated
+- Follow security best practices for AdonisJS applications

@@ -8,10 +8,10 @@ export default class UserService {
     email: string
     password: string
   }) {
-    const existingUser = await User.findBy('email', data.email)
-    if (existingUser) {
-      throw new Error('User with this email already exists')
-    }
+    // const existingUser = await User.findBy('email', data.email)
+    // if (existingUser) {
+    //   throw new Error('User with this email already exists')
+    // }
 
     const hashedPassword = await hash.make(data.password)
     const user = await User.create({

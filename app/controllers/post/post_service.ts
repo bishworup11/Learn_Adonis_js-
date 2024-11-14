@@ -1,5 +1,4 @@
 // posts.service.ts
-import { HttpContext } from '@adonisjs/core/http'
 import Post from '#models/post'
 import PostReact from '#models/PostReact'
 import { ReactType } from '#models/ReplyReact'
@@ -35,6 +34,7 @@ export default class PostsService {
 
     return await this.postsQuery.getAllPosts(authUser.userId, page, limit)
   }
+  
 
   async getPostsByUser(
     authUser: AuthUser,
